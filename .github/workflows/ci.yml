@@ -1,0 +1,40 @@
+name: CI Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout o código
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Configurar o Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      # 3. Instalar o Poetry
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          export PATH="$HOME/.local/bin:$PATH"
+
+      # 4. Instalar dependências usando Poetry
+      - name: Install dependencies with Poetry
+        run: |
+          poetry install
+
+      # 5. Rodar os testes com Poetry
+      - name: Run tests with Poetry
+        run: |
+          poetry run pytest test_app.py
