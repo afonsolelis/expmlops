@@ -1,14 +1,21 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request, abort
 import seaborn as sns
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, accuracy_score
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # Carregar variáveis do arquivo .env
 
 app = Flask(__name__)
 
 # Carregar o dataset Iris
 iris = sns.load_dataset('iris')
+
+# Recuperar o token de autenticação da variável de ambiente
+VALID_TOKEN = os.getenv("VALID_TOKEN")
 
 # Função de treinamento
 def train_model():
@@ -35,6 +42,12 @@ def train_model():
 # Endpoint único para treinamento
 @app.route("/train", methods=["GET"])
 def train():
+    # Verificar o token no parâmetro "params"
+    token = request.args.get("token")
+    if not token or token != VALID_TOKEN:
+        abort(401, description="Unauthorized: Invalid or missing token")
+
+    # Processar o treinamento se o token for válido
     training_results = train_model()
     return jsonify(training_results)
 
